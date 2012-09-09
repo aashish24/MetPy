@@ -44,7 +44,7 @@ packages = ['metpy']
 setup_path = os.path.split(os.path.abspath(__file__))[0]
 sys.path.append(os.path.join(setup_path, dirname))
 module_path = distutils.sysconfig.get_python_lib()
-include_files = ['LICENSE', 'README']
+include_files = ['LICENSE', 'README.md']
 data_files = [(os.path.join(module_path, dirname), include_files)]
 
 import version
