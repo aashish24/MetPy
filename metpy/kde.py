@@ -121,7 +121,10 @@ def gauss2d(data, sigma, xrot=None, h=None, k=None, filled=0.):
         sigy = sigma
 
     # If rotation needed, rotate grid to align for smoothing
-    if xrot: data1 = ndimage.rotate(data, xrot, order=0, reshape=True)
+    if xrot:
+        data1 = ndimage.rotate(data, xrot, order=0, reshape=True)
+    else:
+        data1 = data
 
     # Apply Smoothing to grid
     data1 = ndimage.gaussian_filter(data1, [sigx, sigy], order=0,
