@@ -51,8 +51,8 @@ def fit_gauss2d(data):
     xbar, ybar, cov = inertial_axis(data)
     eigvals, eigvecs = np.linalg.eigh(cov)
     ind_of_max_eigvalue = np.where(eigvals == eigvals.max())[0][0]
-    sigx = np.sqrt(eigvals[0])
-    sigy = np.sqrt(eigvals[1])
+    sigx = np.sqrt(np.abs(eigvals[0]))
+    sigy = np.sqrt(np.abs(eigvals[1]))
     xrot_rad = np.arctan2(eigvecs[1, ind_of_max_eigvalue], eigvecs[0, ind_of_max_eigvalue])
     xrot_deg = (180 / np.pi) * xrot_rad
     if xrot_deg < 0: xrot_deg += 180
