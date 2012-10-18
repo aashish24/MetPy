@@ -1,12 +1,74 @@
 import numpy as np
 from scipy import ndimage
 
-__all__ = ['gauss2d', 'fit_gauss2d']
+__all__ = ['gauss2d', 'fit_gauss2d', 'fit_gauss2d_alt']
 
 
 def fit_gauss2d(data):
     """
     Fit a 2-dimensional anisotropic Gaussian to an image.
+
+    Parameters
+    ----------
+    data : array_like
+        A two dimensional array_like object
+
+    Returns
+    -------
+    sigx : float
+        The standard deviation of the long axis
+
+    sigy : float
+        The standard deviation of the short axis
+
+    xrot : float
+        The angle between the x-axis and the long axis of the distribution.
+
+    """
+    # Create indice arrays
+    ny, nx = data.shape
+    xpts = np.arange(-int(nx/2),int(nx/2)+1)
+    ypts = np.arange(-int(ny/2),int(ny/2)+1)
+    x, y = np.meshgrid(xpts, ypts)
+
+    # Compute components of covariance matrix
+    data_sum = data.sum()
+    mu_x = (data * x).sum() / data_sum
+    mu_y = (data * y).sum() / data_sum
+    diff_x = np.subtract(x, mu_x)
+    diff_y = np.subtract(y, mu_y)
+    sig_xy = (data * diff_x * diff_y).sum() / data_sum
+    sig_x = (data * diff_x**2).sum() / data_sum
+    sig_y = (data * diff_y**2).sum() / data_sum
+
+    # Math operations on covariance matrix
+    cov_matrix = np.matrix([sig_x, sig_xy, sig_xy, sig_y]).reshape(2,2)
+    det_cov_matrix = np.linalg.det(cov_matrix)
+    inv_cov_matrix = np.linalg.inv(cov_matrix)
+
+    # Compute rotation of X-Axis
+    w,v = np.linalg.eig(cov_matrix)
+    ind_of_max_eigvalue = np.where(w == w.max())[0][0]
+    eig_y = v[1, ind_of_max_eigvalue]
+    eig_x = v[0, ind_of_max_eigvalue]
+    xrot_rad = np.arctan2(eig_y, eig_x)
+    xrot_deg = (180 / np.pi) * xrot_rad
+
+    # Make sure Angle is Positive
+    if xrot_deg < 0:
+        xrot_deg += 180
+    if sig_x < sig_y:
+        tmp = sig_x
+        sig_x = sig_y
+        sig_y = tmp
+    return sig_x**0.5, sig_y**0.5, xrot_deg
+
+
+def fit_gauss2d_alt(data):
+    """
+    Alternative function to fit a 2-dimensional anisotropic Gaussian
+    to an image. This tends to produced narrower Gaussians than the
+    other function.
 
     Parameters
     ----------
